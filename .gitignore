@@ -127,3 +127,8 @@ dmypy.json
 .vscode/
 
 Me/Me/secrets.py
+cloud_sql_proxy
+
+deployments.md
+
+Me/static/

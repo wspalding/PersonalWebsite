@@ -9,17 +9,37 @@
         <!-- Latest compiled JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
         
+
+
         <!--import index.css-->
         <script src="{% static 'scripts/index.js' %}"></script>
-
         <!--import main css-->
         <link rel="stylesheet" href="{% static 'css/index.css' %}">
+
         <title>William Spalding</title>
     </head>
+    <body class="content">
+        <div class="col body-content">
+
+            <img src="{% static 'images/dragonfly.jpg' %}" alt="">
+            <a href="{% static 'resumes/WilliamSpaldingResume.pdf' %}" target="_blank">resume</a>   
+        
+            <div class="row">
+                <input type="text">
+                <p>responses from chatbot got here</p>
+            </div>
+
+            <div class="row">
+                <input type="text">
+                <p>subscribe</p>
+            </div>
+
+            <div class="row">
+                <input type="text">
+                <p>constact me</p>
+                <input type="text">
+            </div>
+        </div>
+        
+    </body>
 </html>
-
-<img src="{% static 'images/dragonfly.jpg' %}" alt="">
-
-
-
-<a href="{% static 'resumes/WilliamSpaldingResume.pdf' %}" target="_blank">resume</a>

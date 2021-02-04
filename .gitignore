@@ -132,3 +132,5 @@ cloud_sql_proxy
 deployments.md
 
 Me/static/
+
+*.pkl

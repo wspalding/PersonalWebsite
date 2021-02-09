@@ -5,6 +5,24 @@
             "patterns": ["Hi", "Hello", "what is this", "General Kenobi"],
             "responses": ["Hello There", "hi","Whats up", "How are you"],
             "context": [""]
+        },
+        {
+            "tag": "schedualing",
+            "patterns": ["when are you available", "can I see your portfolio", "can I see your resume"],
+            "responses": ["I am available to talk between {}", "if you would like to talk you can email me at {}"],
+            "context": [""]
+        },
+        {
+            "tag": "resume",
+            "patterns": ["can I see your resume"],
+            "responses": ["you can view my resume at {}" ],
+            "context": [""]
+        },
+        {
+            "tag": "portfolio",
+            "patterns": ["can I see your portfolio"],
+            "responses": ["some projects I have worked on are {}" ],
+            "context": [""]
         }
     ]
 }

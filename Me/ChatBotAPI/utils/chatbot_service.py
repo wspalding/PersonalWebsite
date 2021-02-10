@@ -1,8 +1,3 @@
-import nltk
-import json
-import pickle
-import numpy as np
-from nltk.stem import WordNetLemmatizer
 from django.conf import settings
 from tensorflow.keras.models import load_model
 

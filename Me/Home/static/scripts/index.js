@@ -10,7 +10,7 @@ function initSubscribeButton() {
 function GetChatBotResponse() {
     $.ajax({
         type: 'GET',
-        url: '/chatbot/get_response', 
+        url: '/chatbot/build', 
         contentType: 'application/json',
         data : {
             prompt: "test val"

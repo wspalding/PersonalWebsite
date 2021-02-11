@@ -17,7 +17,8 @@ class Statement(models.Model):
         return self.statement
 
     def format_to_tokens(self, tokenizer):
-        return tokenizer.tokenize(self.statement)
+        tokens = tokenizer.tokenize(self.statement)
+        return [t.replace('</w>', '') for t in tokens]
 
 class History(models.Model):
     phrase = models.CharField(max_length=100)
@@ -34,5 +35,6 @@ class History(models.Model):
         return self.phrase
 
     def format_to_tokens(self, tokenizer):
-        return tokenizer.tokenize(self.phrase)
+        tokens = tokenizer.tokenize(self.phrase)
+        return [t.replace('</w>', '') for t in tokens]
 

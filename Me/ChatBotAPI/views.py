@@ -32,12 +32,11 @@ def get_chatbot_response(request):
 
 
 def build_chatbot(request):
-    persona_statements, history_statements, reply = cbf.build_input() 
+    words, segments = cbf.build_chatbot_for_persona(constants.CURRENT_PERSONA) 
     return JsonResponse({
-                            "persona_statements": persona_statements,
-                            "history_statements": history_statements,
-                            "reply": reply
-                            })
+                            "words": words,
+                            "segments": segments,
+                        })
 
 
 def test(request):

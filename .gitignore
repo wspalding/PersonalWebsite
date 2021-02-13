@@ -136,3 +136,5 @@ Me/static/
 *.pkl
 
 *.h5
+
+Me/ChatBotAPI/utils/data/personachat_self_original.json

@@ -32,10 +32,10 @@ def get_chatbot_response(request):
 
 
 def build_chatbot(request):
-    words, segments = cbf.build_chatbot_for_persona(constants.CURRENT_PERSONA) 
+    lm_loss, mc_loss = cbf.build_chatbot_for_persona(constants.CURRENT_PERSONA) 
     return JsonResponse({
-                            "words": words,
-                            "segments": segments,
+                            "lm_loss": lm_loss,
+                            "mc_loss": mc_loss,
                         })
 
 

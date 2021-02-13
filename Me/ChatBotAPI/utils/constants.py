@@ -11,3 +11,5 @@ ATTR_TO_SPECIAL_TOKEN = {'bos_token': '<bos>', 'eos_token': '<eos>', 'pad_token'
                          'additional_special_tokens': ['<speaker1>', '<speaker2>']}
 
 CURRENT_PERSONA = 'Primary'
+
+PERSONACHAT_DATASET_PATH = PATH_TO_DATA + 'personachat_self_original.json'

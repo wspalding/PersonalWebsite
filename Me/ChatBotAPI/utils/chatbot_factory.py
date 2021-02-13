@@ -1,3 +1,6 @@
+import random
+import json
+import tensorflow as tf
 from django.conf import settings
 from itertools import chain
 
@@ -21,21 +24,55 @@ class ChatBotFactory():
 
 
     def build_chatbot_for_persona(self, persona):
-        words, segments, position, sequence = self.build_input(persona)
-
+        persona_statements, history_statements, reply, distractor = self.get_persona(persona)
+        
+        words, segments, position, sequence = self.build_input(persona_statements, history_statements, reply)
+        words_distractor, segments_distractor, _, _ = self.build_input(persona_statements, history_statements, distractor)
+        
         words = self.gpt_tokenizer.convert_tokens_to_ids(words)
         segments = self.gpt_tokenizer.convert_tokens_to_ids(segments)
-        return words, segments
+        words_distractor = self.gpt_tokenizer.convert_tokens_to_ids(words_distractor)
+        segments_distractor = self.gpt_tokenizer.convert_tokens_to_ids(segments_distractor)
+        
+        # Prepare our language modeling targets: keep only the reply segment, -1 on the rest
+        lm_targets = ([-1] * sum(len(s) for s in sequence[:-1])) \
+                    + [-1] + self.gpt_tokenizer.convert_tokens_to_ids(sequence[-1][1:])
+        lm_distractor = [-1] * len(words_distractor)
 
-    def build_input(self, persona):
-        persona = models.Persona.objects.get(name=persona)
-        if not persona:
-            return "persona could not be found"
-        persona_statements = [s.format_to_tokens(self.gpt_tokenizer) for s in persona.statements.all()]
-        history_statements = [h.format_to_tokens(self.gpt_tokenizer) for h in persona.history.order_by('-previous')]
-        reply = history_statements.pop()
-        history_statements.reverse()
+        # Store the position of the last tokens for the next-sentence prediction loss
+        last_token = len(words) - 1
+        last_token_distractor = len(words_distractor) - 1
 
+        # Now we can pad reply and distractor inputs and targets to the same length
+        padding_length = max(len(words), len(words_distractor))
+        def pad(x, padding):
+            return x + [padding] * (padding_length - len(x))
+
+        (words, words_distractor,
+        segments, segments_distractor) = [pad(x, self.gpt_tokenizer.convert_tokens_to_ids('<pad>'))
+                                        for x in (words, words_distractor,
+                                                    segments, segments_distractor)]
+
+        (lm_targets, lm_distractor) = [pad(x, -1) for x in (lm_targets, lm_distractor)]
+
+        input_ids = tf.convert_to_tensor([[words, words_distractor]], dtype=tf.float64)
+        token_type_ids = tf.convert_to_tensor([[segments, segments_distractor]], dtype=tf.float64)
+        mc_token_ids = tf.convert_to_tensor([[last_token, last_token_distractor]], dtype=tf.float64)
+        lm_labels = tf.convert_to_tensor([[lm_targets, lm_distractor]], dtype=tf.float64)
+        mc_labels = tf.convert_to_tensor([0], dtype=tf.float64)
+
+        lm_loss, mc_loss = self.gpt_model({
+            "input_ids": input_ids,
+            "mc_token_ids": mc_token_ids,
+            "lm_labels": lm_labels,
+            "mc_labels": mc_labels,
+            "token_type_ids": token_type_ids
+        })
+
+        return lm_loss, mc_loss
+
+
+    def build_input(self, persona_statements, history_statements, reply):
         sequence = [[self.bos] + list(chain(*persona_statements))] + history_statements + [reply + [self.eos]]
         sequence = [sequence[0]] + [ [self.speaker2 if (len(sequence)-i) % 2 else self.speaker1] + s
                                     for i, s in enumerate(sequence[1:])]
@@ -46,4 +83,20 @@ class ChatBotFactory():
         position = list(range(len(words)))                      # position tokens
         return words, segments, position, sequence
 
-        # return persona_statements, history_statements, reply
+
+    def get_persona(self, persona):
+        persona = models.Persona.objects.get(name=persona)
+        if not persona:
+            return "persona could not be found"
+        persona_statements = [s.format_to_tokens(self.gpt_tokenizer) for s in persona.statements.all()]
+        history_statements = [h.format_to_tokens(self.gpt_tokenizer) for h in persona.history.order_by('-previous')]
+        other = models.History.objects.all().exclude(Persona=persona)
+        distractor = random.choice(other).format_to_tokens(self.gpt_tokenizer)
+        reply = history_statements.pop()
+        history_statements.reverse()
+        return persona_statements, history_statements, reply, distractor
+
+    def load_personachat_dataset(self):
+        with open(constants.PERSONACHAT_DATASET_PATH) as f:
+            data = json.load(f)
+        return data

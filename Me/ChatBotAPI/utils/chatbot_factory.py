@@ -8,6 +8,7 @@ from transformers import OpenAIGPTTokenizer, TFOpenAIGPTDoubleHeadsModel
 from ChatBotAPI import models
 
 from ChatBotAPI.utils import constants
+from ChatBotAPI.utils import misc
 
 
 class ChatBotFactory():
@@ -55,21 +56,21 @@ class ChatBotFactory():
 
         (lm_targets, lm_distractor) = [pad(x, -1) for x in (lm_targets, lm_distractor)]
 
-        input_ids = tf.convert_to_tensor([[words, words_distractor]], dtype=tf.float64)
-        token_type_ids = tf.convert_to_tensor([[segments, segments_distractor]], dtype=tf.float64)
-        mc_token_ids = tf.convert_to_tensor([[last_token, last_token_distractor]], dtype=tf.float64)
-        lm_labels = tf.convert_to_tensor([[lm_targets, lm_distractor]], dtype=tf.float64)
-        mc_labels = tf.convert_to_tensor([0], dtype=tf.float64)
+        input_ids = tf.convert_to_tensor([[words, words_distractor]], dtype=tf.float32)
+        token_type_ids = tf.convert_to_tensor([[segments, segments_distractor]], dtype=tf.float32)
+        mc_token_ids = tf.convert_to_tensor([[last_token, last_token_distractor]], dtype=tf.float32)
+        lm_labels = tf.convert_to_tensor([[lm_targets, lm_distractor]], dtype=tf.float32)
+        mc_labels = tf.convert_to_tensor([0], dtype=tf.float32)
 
-        lm_loss, mc_loss = self.gpt_model({
-            "input_ids": input_ids,
-            "mc_token_ids": mc_token_ids,
-            "lm_labels": lm_labels,
-            "mc_labels": mc_labels,
-            "token_type_ids": token_type_ids
-        })
+        # r = {
+        #     "input_ids": str(input_ids),
+        #     "mc_token_ids": str(mc_token_ids),
+        #     "lm_labels": str(lm_labels),
+        #     "mc_labels": str(mc_labels),
+        #     "token_type_ids": str(token_type_ids)
+        # }
 
-        return lm_loss, mc_loss
+        
 
 
     def build_input(self, persona_statements, history_statements, reply):
@@ -97,6 +98,23 @@ class ChatBotFactory():
         return persona_statements, history_statements, reply, distractor
 
     def load_personachat_dataset(self):
-        with open(constants.PERSONACHAT_DATASET_PATH) as f:
-            data = json.load(f)
-        return data
+        with open(constants.PERSONACHAT_DATASET_PATH,"r", encoding="utf-8") as f:
+            data = json.loads(f.read())
+            data = misc.modify_nested_dict(data, self.format_data_string)
+            return data
+
+    def format_data_string(self, string):
+        tokenized_string = self.gpt_tokenizer.tokenize(string)
+        ids = self.gpt_tokenizer.convert_tokens_to_ids(tokenized_string)
+        return ids
+
+
+    def make_prediction(self, words):
+        result = self.gpt_model.predict(words)
+        #last = result.logits[0, -1, :]
+        softmax_val = tf.argmax(tf.squeeze(result.logits), axis=1) 
+        string = self.gpt_tokenizer.decode(softmax_val)
+
+        return string
+
+

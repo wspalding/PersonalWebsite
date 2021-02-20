@@ -32,11 +32,9 @@ def get_chatbot_response(request):
 
 
 def build_chatbot(request):
-    lm_loss, mc_loss = cbf.build_chatbot_for_persona(constants.CURRENT_PERSONA) 
-    return JsonResponse({
-                            "lm_loss": lm_loss,
-                            "mc_loss": mc_loss,
-                        })
+    # r = cbf.build_chatbot_for_persona(constants.CURRENT_PERSONA) 
+    data = cbf.load_personachat_dataset()
+    return JsonResponse(data)
 
 
 def test(request):

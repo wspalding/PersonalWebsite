@@ -3,6 +3,7 @@ import json
 import tensorflow as tf
 from django.conf import settings
 from itertools import chain
+from tensorflow.python.ops.math_ops import argmax
 
 from transformers import OpenAIGPTTokenizer, TFOpenAIGPTDoubleHeadsModel
 from ChatBotAPI import models
@@ -109,12 +110,16 @@ class ChatBotFactory():
         return ids
 
 
-    def make_prediction(self, words):
-        result = self.gpt_model.predict(words)
-        #last = result.logits[0, -1, :]
-        softmax_val = tf.argmax(tf.squeeze(result.logits), axis=1) 
-        string = self.gpt_tokenizer.decode(softmax_val)
+    # def make_prediction(self, words):
+    #     result = self.gpt_model.predict(words)
+    #     #last = result.logits[0, -1, :]
+    #     softmax_val = tf.argmax(tf.squeeze(result.logits), axis=1) 
+    #     string = self.gpt_tokenizer.decode(softmax_val)
 
-        return string
+    #     return string
 
+    def convert_model_output_to_words(self, output):
+        arg_max = tf.argmax(tf.squeeze(output.logits), axis=1) 
+        strings = self.gpt_tokenizer.decode(argmax)
+        return strings
 

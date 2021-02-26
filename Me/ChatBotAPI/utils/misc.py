@@ -1,6 +1,6 @@
 import collections
 from typing import List
-
+import json
 
 
 
@@ -16,3 +16,7 @@ def modify_nested_dict(d, func):
         else:
             d[k] = func(v)
     return d
+
+def save_json_to_file(file, data):
+    with open(file, 'w+') as f:
+        json.dump(data, f)

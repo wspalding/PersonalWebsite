@@ -1,6 +1,8 @@
 import random
 import json
+from collections import defaultdict
 import tensorflow as tf
+import numpy as np
 from django.conf import settings
 from itertools import chain
 from tensorflow.python.ops.math_ops import argmax
@@ -17,12 +19,20 @@ class ChatBotFactory():
         self.gpt_model = TFOpenAIGPTDoubleHeadsModel.from_pretrained('openai-gpt')
         self.gpt_tokenizer = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
         self.bos, self.eos, self.speaker1, self.speaker2, self.pad = constants.SPECIAL_TOKENS
-
         orig_num_tokens = len(self.gpt_tokenizer.encoder)
         num_added_tokens = self.gpt_tokenizer.add_special_tokens(constants.ATTR_TO_SPECIAL_TOKEN)
         if num_added_tokens > 0:
             self.gpt_model.resize_token_embeddings(new_num_tokens=orig_num_tokens + num_added_tokens)
+        
+        self.bos_id = self.gpt_tokenizer.convert_tokens_to_ids(self.bos)
+        self.eos_id = self.gpt_tokenizer.convert_tokens_to_ids(self.eos)
+        self.speaker1_id = self.gpt_tokenizer.convert_tokens_to_ids(self.speaker1)
+        self.speaker2_id = self.gpt_tokenizer.convert_tokens_to_ids(self.speaker2)
+        self.pad_id = self.gpt_tokenizer.convert_tokens_to_ids(self.pad)
         # self.gpt_model.set_num_special_tokens(len(constants.SPECIAL_TOKENS))
+        self.num_candidates = 2
+        self.personality_permutations = 1
+        self.max_history = 2
 
 
     def build_chatbot_for_persona(self, persona):
@@ -72,18 +82,77 @@ class ChatBotFactory():
         # }
 
         
+    def load_personachat_dataset(self, formatted=True):
+        if formatted:
+            file = constants.PERSONACHAT_FORMATTED_DATASET_PATH
+        else:
+            file = constants.PERSONACHAT_DATASET_PATH
+        with open(file,"r", encoding="utf-8") as f:
+            data = json.loads(f.read())
+            return data
+
+    def train_model_on_dataset(self):
+        # data = self.load_personachat_dataset()
+        # data['train'] = self.format_dataset(data['train'])
+        # data['valid'] = self.format_dataset(data['valid'])
+        train, valid = self.get_formatted_dataset(self.load_personachat_dataset)
+
+        pass
+
+    def save_model(self, file_name):
+        pass
+
+    def get_formatted_dataset(self, data_function):
+        personachat = data_function()
+
+        datasets = {"train": defaultdict(list), "valid": defaultdict(list)}
+        for dataset_name, dataset in personachat.items():
+            num_candidates = len(dataset[0]["utterances"][0]["candidates"])
+            if self.num_candidates > 0 and dataset_name == 'train':
+                num_candidates = min(self.num_candidates, num_candidates)
+            for dialog in dataset:
+                persona = dialog["personality"].copy()
+                for _ in range(self.personality_permutations):
+                    for utterance in dialog["utterances"]:
+                        history = utterance["history"][-(2*self.max_history+1):]
+                        for j, candidate in enumerate(utterance["candidates"][-num_candidates:]):
+                            lm_labels = bool(j == num_candidates-1)
+                            instance = self.build_input(persona, history, candidate, lm_labels=lm_labels)
+                            for input_name, input_array in instance.items():
+                                datasets[dataset_name][input_name].append(input_array)
+                        datasets[dataset_name]["mc_labels"].append(num_candidates - 1)
+                        datasets[dataset_name]["n_candidates"] = num_candidates
+                    persona = [persona[-1]] + persona[:-1]  # permuted personalities
+
+        tensor_datasets = {"train": [], "valid": []}
+        for dataset_name, dataset in datasets.items():
+            dataset = self.pad_dataset(dataset, padding=self.pad_id)
+            for input_name in constants.MODEL_INPUTS:
+                tensor = np.asfarray(dataset[input_name])
+                if input_name != "mc_labels":
+                    shape = [-1, dataset["n_candidates"], *tensor.shape[1:]]
+                    tensor = np.reshape(tensor, shape)
+                tensor_datasets[dataset_name].append(tensor)
+
+        return tensor_datasets['train'], tensor_datasets['valid']
+        # train_dataset, valid_dataset = TensorDataset(*tensor_datasets["train"]), TensorDataset(*tensor_datasets["valid"])
 
 
-    def build_input(self, persona_statements, history_statements, reply):
-        sequence = [[self.bos] + list(chain(*persona_statements))] + history_statements + [reply + [self.eos]]
-        sequence = [sequence[0]] + [ [self.speaker2 if (len(sequence)-i) % 2 else self.speaker1] + s
-                                    for i, s in enumerate(sequence[1:])]
-        # Build our word, segments and position inputs from the sequence
-        words = list(chain(*sequence))                          # word tokens
-        segments = [self.speaker2 if i % 2 else self.speaker1   # segment tokens
-                    for i, s in enumerate(sequence) for _ in s]
-        position = list(range(len(words)))                      # position tokens
-        return words, segments, position, sequence
+    def build_input(self, persona, history, reply, lm_labels=False, with_eos=True, as_ids=True):
+        bos = self.bos_id if as_ids else self.bos
+        eos = self.eos_id if as_ids else self.eos
+        speaker1 = self.speaker1_id if as_ids else self.speaker1
+        speaker2 = self.speaker2_id if as_ids else self.speaker2
+        sequence = [[bos] + list(chain(*persona))] + history + [reply + ([eos] if with_eos else [])]
+        sequence = [sequence[0]] + [[speaker2 if (len(sequence)-i) % 2 else speaker1] + s for i, s in enumerate(sequence[1:])]
+        instance = {}
+        instance["input_ids"] = list(chain(*sequence))
+        instance["token_type_ids"] = [speaker2 if i % 2 else speaker1 for i, s in enumerate(sequence) for _ in s]
+        instance["mc_token_ids"] = len(instance["input_ids"]) - 1
+        instance["lm_labels"] = [-100] * len(instance["input_ids"])
+        if lm_labels:
+            instance["lm_labels"] = ([-100] * sum(len(s) for s in sequence[:-1])) + [-100] + sequence[-1][1:]
+        return instance
 
 
     def get_persona(self, persona):
@@ -92,23 +161,34 @@ class ChatBotFactory():
             return "persona could not be found"
         persona_statements = [s.format_to_tokens(self.gpt_tokenizer) for s in persona.statements.all()]
         history_statements = [h.format_to_tokens(self.gpt_tokenizer) for h in persona.history.order_by('-previous')]
-        other = models.History.objects.all().exclude(Persona=persona)
-        distractor = random.choice(other).format_to_tokens(self.gpt_tokenizer)
+        
         reply = history_statements.pop()
         history_statements.reverse()
-        return persona_statements, history_statements, reply, distractor
+        return persona_statements, history_statements, reply
 
-    def load_personachat_dataset(self):
-        with open(constants.PERSONACHAT_DATASET_PATH,"r", encoding="utf-8") as f:
-            data = json.loads(f.read())
-            data = misc.modify_nested_dict(data, self.format_data_string)
-            return data
 
     def format_data_string(self, string):
         tokenized_string = self.gpt_tokenizer.tokenize(string)
         ids = self.gpt_tokenizer.convert_tokens_to_ids(tokenized_string)
         return ids
 
+
+    def convert_model_output_to_words(self, output):
+        arg_max = tf.argmax(tf.squeeze(output.logits), axis=1) 
+        strings = self.gpt_tokenizer.decode(argmax)
+        return strings
+
+    def get_distractor(self, persona):
+        other = models.History.objects.all().exclude(Persona=persona)
+        distractor = random.choice(other).format_to_tokens(self.gpt_tokenizer)
+        return distractor
+
+    def pad_dataset(self, dataset, padding=0):
+        """ Pad the dataset. This could be optimized by defining a Dataset class and padding at the batch level, but this is simpler. """
+        max_l = max(len(x) for x in dataset["input_ids"])
+        for name in constants.PADDED_INPUTS:
+            dataset[name] = [x + [padding if name != "lm_labels" else -100] * (max_l - len(x)) for x in dataset[name]]
+        return dataset
 
     # def make_prediction(self, words):
     #     result = self.gpt_model.predict(words)
@@ -117,9 +197,3 @@ class ChatBotFactory():
     #     string = self.gpt_tokenizer.decode(softmax_val)
 
     #     return string
-
-    def convert_model_output_to_words(self, output):
-        arg_max = tf.argmax(tf.squeeze(output.logits), axis=1) 
-        strings = self.gpt_tokenizer.decode(argmax)
-        return strings
-

@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 
 from tensorflow.keras.models import load_model
 
-from ChatBotAPI.utils import constants
+from ChatBotAPI.utils import constants, misc
 from ChatBotAPI.utils.chatbot_service import ChatBotService
 from ChatBotAPI.utils.chatbot_factory import ChatBotFactory
 from ChatBotAPI import models
@@ -33,8 +33,9 @@ def get_chatbot_response(request):
 
 def build_chatbot(request):
     # r = cbf.build_chatbot_for_persona(constants.CURRENT_PERSONA) 
-    data = cbf.load_personachat_dataset()
-    return JsonResponse(data)
+    # data = cbf.load_personachat_dataset()
+    cbf.train_model_on_dataset()
+    return JsonResponse()
 
 
 def test(request):

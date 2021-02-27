@@ -43,7 +43,7 @@ class ChatBotFactory():
         self.learning_rate = kwargs.get('lr', 6.25e-5)
 
         #compile model
-        self.compile_model()
+        self.build_model()
 
 
     def build_chatbot_for_persona(self, persona):
@@ -117,9 +117,10 @@ class ChatBotFactory():
         pass
 
     def build_model(self):
+        
         optimizer = Adam(learning_rate=self.learning_rate)
         loss = CategoricalCrossentropy()
-        
+
         self.gpt_model.compile(optimizer=optimizer, 
                                 loss=loss, 
                                 metrics=[])

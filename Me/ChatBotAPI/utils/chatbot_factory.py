@@ -8,6 +8,8 @@ from itertools import chain
 from tensorflow.python.ops.math_ops import argmax
 
 from transformers import OpenAIGPTTokenizer, TFOpenAIGPTDoubleHeadsModel
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import CategoricalCrossentropy
 from ChatBotAPI import models
 
 from ChatBotAPI.utils import constants
@@ -15,7 +17,7 @@ from ChatBotAPI.utils import misc
 
 
 class ChatBotFactory():
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.gpt_model = TFOpenAIGPTDoubleHeadsModel.from_pretrained('openai-gpt')
         self.gpt_tokenizer = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
         self.bos, self.eos, self.speaker1, self.speaker2, self.pad = constants.SPECIAL_TOKENS
@@ -29,10 +31,19 @@ class ChatBotFactory():
         self.speaker1_id = self.gpt_tokenizer.convert_tokens_to_ids(self.speaker1)
         self.speaker2_id = self.gpt_tokenizer.convert_tokens_to_ids(self.speaker2)
         self.pad_id = self.gpt_tokenizer.convert_tokens_to_ids(self.pad)
-        # self.gpt_model.set_num_special_tokens(len(constants.SPECIAL_TOKENS))
-        self.num_candidates = 2
-        self.personality_permutations = 1
-        self.max_history = 2
+
+        # data vars
+        self.num_candidates = kwargs.get('num_candidates', 2)
+        self.personality_permutations = kwargs.get('personality_permutations', 1)
+        self.max_history = kwargs.get('max_history', 2)
+
+        # training vars
+        self.training_epocs = kwargs.get('training_epochs', 3)
+        self.training_batch_size = kwargs.get('training_batch_size', 4)
+        self.learning_rate = kwargs.get('lr', 6.25e-5)
+
+        #compile model
+        self.compile_model()
 
 
     def build_chatbot_for_persona(self, persona):
@@ -95,9 +106,23 @@ class ChatBotFactory():
         # data = self.load_personachat_dataset()
         # data['train'] = self.format_dataset(data['train'])
         # data['valid'] = self.format_dataset(data['valid'])
+        print(self.gpt_model.summary())
+        
         train, valid = self.get_formatted_dataset(self.load_personachat_dataset)
-
+        input_ids, mc_token_ids, lm_labels, mc_labels, token_type_ids = train
+        self.gpt_model.fit(x=[input_ids, mc_token_ids, token_type_ids],
+                            y=[lm_labels, mc_labels], 
+                            epochs=self.training_epocs, 
+                            batch_size=self.training_batch_size)
         pass
+
+    def build_model(self):
+        optimizer = Adam(learning_rate=self.learning_rate)
+        loss = CategoricalCrossentropy()
+        
+        self.gpt_model.compile(optimizer=optimizer, 
+                                loss=loss, 
+                                metrics=[])
 
     def save_model(self, file_name):
         pass
@@ -128,11 +153,18 @@ class ChatBotFactory():
         for dataset_name, dataset in datasets.items():
             dataset = self.pad_dataset(dataset, padding=self.pad_id)
             for input_name in constants.MODEL_INPUTS:
-                tensor = np.asfarray(dataset[input_name])
+                tensor = np.asarray(dataset[input_name])
                 if input_name != "mc_labels":
                     shape = [-1, dataset["n_candidates"], *tensor.shape[1:]]
                     tensor = np.reshape(tensor, shape)
                 tensor_datasets[dataset_name].append(tensor)
+
+        print("training shapes")
+        for arr in tensor_datasets['train']:
+            print(arr.shape)
+        print('validation shapes')
+        for arr in tensor_datasets['valid']:
+            print(arr.shape)
 
         return tensor_datasets['train'], tensor_datasets['valid']
         # train_dataset, valid_dataset = TensorDataset(*tensor_datasets["train"]), TensorDataset(*tensor_datasets["valid"])

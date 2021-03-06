@@ -1,18 +1,25 @@
 import json
+from django.conf import settings
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
 from tensorflow.keras.models import load_model
 
 from ChatBotAPI.utils import constants, misc
+from ChatBotAPI.utils.chatbot_serviceV0 import ChatBotServiceV0
 from ChatBotAPI.utils.chatbot_service import ChatBotService
-from ChatBotAPI.utils.chatbot_factory import ChatBotFactory
+# from ChatBotAPI.utils.chatbot_factory import ChatBotFactory
 from ChatBotAPI import models
 
 from transformers import OpenAIGPTTokenizer
 
 tokenizer = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
-cbf = ChatBotFactory()
+# cbf = ChatBotFactory()
+
+chatbot_model_checkpoint = constants.PATH_TO_MODELS + settings.CHATBOT_MODEL_CHECKPOINT
+chatbot_persona = settings.CHATBOT_PERSONA
+cbs = ChatBotServiceV0(model_checkpoint=chatbot_model_checkpoint,
+                        persona=chatbot_persona)
 
 # Create your views here.
 def index(request):
@@ -25,10 +32,10 @@ def index(request):
 
 
 def get_chatbot_response(request):
-    # data = request.GET.get('prompt')
-    persona = models.Persona.objects.get(name='Primary')
-    statements = [s.format_to_tokens(tokenizer) for s in persona.statements.all()]
-    return JsonResponse({"answer": statements})
+    data = request.GET.get('prompt')
+    history = request.GET.get('history')
+    answer = cbs.get_response(data, history)
+    return JsonResponse({"answer": answer})
 
 
 def build_chatbot(request):

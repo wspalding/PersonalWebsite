@@ -10,10 +10,11 @@ function initSubscribeButton() {
 function GetChatBotResponse() {
     $.ajax({
         type: 'GET',
-        url: '/chatbot/build', 
+        url: '/chatbot/get_response', 
         contentType: 'application/json',
         data : {
-            prompt: "test val"
+            prompt: "hello",
+            history: []
         }
     })
     .done(function(response) {

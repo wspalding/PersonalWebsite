@@ -118,3 +118,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
+
+
+# ChatBot Model Checkpoint
+CHATBOT_MODEL_CHECKPOINT = 'HFPretrained'
+CHATBOT_PERSONA = 'Primary'

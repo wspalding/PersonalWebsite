@@ -7,7 +7,7 @@ from django.conf import settings
 from itertools import chain
 from tensorflow.python.ops.math_ops import argmax
 
-from transformers import OpenAIGPTTokenizer, TFOpenAIGPTDoubleHeadsModel
+from transformers import OpenAIGPTTokenizer, TFOpenAIGPTDoubleHeadsModel, TFTrainer, TFTrainingArguments
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import CategoricalCrossentropy
 from ChatBotAPI import models
@@ -109,6 +109,7 @@ class ChatBotFactory():
         print(self.gpt_model.summary())
         
         train, valid = self.get_formatted_dataset(self.load_personachat_dataset)
+
         input_ids, mc_token_ids, lm_labels, mc_labels, token_type_ids = train
         self.gpt_model.fit(x=[input_ids, mc_token_ids, token_type_ids],
                             y=[lm_labels, mc_labels], 
@@ -117,7 +118,7 @@ class ChatBotFactory():
         pass
 
     def build_model(self):
-        
+
         optimizer = Adam(learning_rate=self.learning_rate)
         loss = CategoricalCrossentropy()
 

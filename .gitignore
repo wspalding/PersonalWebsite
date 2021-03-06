@@ -144,3 +144,7 @@ google_cloud_sdk/
 Me/ChatBotAPI/utils/personachat_self_original.json
 
 Me/ChatBotAPI/utils/data/personachat_formatted_ids.json
+
+Me/ChatBotAPI/utils/models/HFPretrained/
+
+wandb/

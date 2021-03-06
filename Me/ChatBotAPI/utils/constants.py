@@ -1,6 +1,7 @@
 
 PATH_TO_UTILS = 'Me/ChatBotAPI/utils/'
 PATH_TO_DATA = 'Me/ChatBotAPI/utils/data/'
+PATH_TO_MODELS = 'Me/ChatBotAPI/utils/models/'
 
 
 CHATBOT_MODEL_FILE = 'chatbot_model.h5'
@@ -18,3 +19,5 @@ CURRENT_PERSONA = 'Primary'
 PERSONACHAT_DATASET_PATH = PATH_TO_DATA + 'personachat_self_original.json'
 PERSONACHAT_FORMATTED_DATASET_PATH = PATH_TO_DATA + 'personachat_formatted_ids.json'
 # PERSONACHAT_TRAIN_DATA_AS_NUMPY = PATH_TO_DATA + 'personachat_train_numpy.'
+
+HF_FINETUNED_MODEL = "https://s3.amazonaws.com/models.huggingface.co/transfer-learning-chatbot/gpt_personachat_cache.tar.gz"

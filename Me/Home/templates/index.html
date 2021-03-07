@@ -2,8 +2,11 @@
 <html>
     <head>
         <!--import bootstrap-->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
         <!-- jQuery library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <!-- Latest compiled JavaScript -->
@@ -20,26 +23,64 @@
     </head>
     <body class="content">
         <div class="col body-content">
-
-            <img src="{% static 'images/dragonfly.jpg' %}" alt="">
-            <a href="{% static 'resumes/WilliamSpaldingResume.pdf' %}" target="_blank">resume</a>   
-        
             <div class="row">
-                <input type="text">
-                <p>responses from chatbot got here</p>
+
+                <!--left column-->
+                <div class="col" style="text-align: center;">
+                    <div class="side-col-padding">
+
+                    </div>
+                    <div class="card nav-btn left-nav-btn">
+                        <a class="nav-link" href="{% static 'resumes/WilliamSpaldingResume.pdf' %}" target="_blank">Resume</a>
+                    </div>
+                    <div class="card nav-btn left-nav-btn">
+                        <a class="nav-link" href="#contact-form" >Contact</a>
+                    </div>    
+                </div>
+
+                <!--central column-->
+                <div class="col-6">
+
+                    <!--profile-->
+                    <div class="row">
+                        <h1 class="title" >
+                            William Spalding
+                        </h1>
+                    </div>
+
+                    <!-- <img class="profile-img" src="{% static 'images/dragonfly.jpg' %}" alt=""> -->
+                    <!--chatbot-->
+                    <div class="row">
+                        <div class="chatbot-form">
+
+                        </div>
+                    </div>
+
+                    <!--Contact form-->
+                    <div class="row">
+                        <div class="contact-form" id="contact-form">
+                            contact
+                        </div>
+                    </div>
+
+                </div>
+
+                <!--right column-->
+                <div class="col" style="text-align: center;">
+                    <div class="side-col-padding">
+
+                    </div>
+                    <div class="card nav-btn right-nav-btn">
+                        <a class="nav-link" href="https://github.com/wspalding" target="_blank">Github</a>
+                    </div>   
+                    <div class="card nav-btn right-nav-btn">
+                        <a class="nav-link" href="https://linkedin.com/in/william-spalding" target="_blank">Linkedin</a>
+                    </div>
+ 
+                    
+                </div>
             </div>
 
-            <div class="row">
-                <input type="text">
-                <p>subscribe</p>
-            </div>
-
-            <div class="row">
-                <input type="text">
-                <p>constact me</p>
-                <input type="text">
-            </div>
         </div>
-        
     </body>
 </html>

@@ -1,7 +1,46 @@
 body {
     width: 100%;
+    background-color:  rgba(0,212,255,1);
 }
 
 .body-content {
     margin: auto;
+    background: rgb(255,255,255);
+    background: radial-gradient(circle, rgba(255,255,255,1) 43%, rgba(0,212,255,1) 100%);
+    height: 100%;
+
+}
+
+.title {
+    text-align: center;
+    width: 100%;
+}
+
+.side-col-padding {
+    padding-top: 7rem;
+
+}
+
+.nav-btn {
+    margin-bottom: 10px;
+    border: double 4px lightgray;
+}
+
+.left-nav-btn {
+    margin-left: -30px;
+}
+
+.right-nav-btn {
+    margin-right: -30px;
+}
+
+.nav-link {
+    padding: 30px;
+}
+
+.profile-img {
+    border-radius: 50%;
+    object-fit: cover;
+    width: 500px;
+    height: 500px;
 }

@@ -7,7 +7,7 @@ from itertools import chain
 from ChatBotAPI.utils import constants
 from ChatBotAPI import models
 from transformers import cached_path
-from transformers import OpenAIGPTLMHeadModel, OpenAIGPTTokenizer, GPT2LMHeadModel, GPT2Tokenizer
+from transformers import OpenAIGPTLMHeadModel, OpenAIGPTTokenizer #, GPT2LMHeadModel, GPT2Tokenizer
 
 class ChatBotServiceV0():
     def __init__(self, **kwargs) -> None:

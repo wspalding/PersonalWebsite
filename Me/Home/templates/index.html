@@ -12,7 +12,9 @@
         <!-- Latest compiled JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
         
-
+        <!-- import font awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/brands.min.css"> -->
 
         <!--import index.css-->
         <script src="{% static 'scripts/index.js' %}"></script>
@@ -31,10 +33,16 @@
 
                     </div>
                     <div class="card nav-btn left-nav-btn">
-                        <a class="nav-link page-text" href="{% static 'resumes/WilliamSpaldingResume.pdf' %}" target="_blank">Resume</a>
+                        <a class="nav-link page-text" href="{% static 'resumes/WilliamSpaldingResume.pdf' %}" target="_blank">
+                            <i class="fa fa-file-pdf"></i>
+                            Resume
+                        </a>
                     </div>
                     <div class="card nav-btn left-nav-btn">
-                        <a class="nav-link page-text" href="mailto:williamspalding00@gmail.com?subject=Hello" >Contact</a>
+                        <a class="nav-link page-text" href="mailto:williamspalding00@gmail.com?subject=Hello" >
+                            <i class="fa fa-envelope"></i>
+                            Contact
+                        </a>
                     </div>    
                 </div>
 
@@ -47,8 +55,9 @@
                             William Spalding
                         </h1>
                     </div>
-
-                    <!-- <img class="profile-img" src="{% static 'images/dragonfly.jpg' %}" alt=""> -->
+                    <div class="row profile-section">
+                        <img class="profile-img" src="{% static 'images/me2.png' %}" alt="">
+                    </div>
                     <!--chatbot-->
                     <div class="row chatbot-section">
                         <div class="col">
@@ -76,10 +85,16 @@
 
                     </div>
                     <div class="card nav-btn right-nav-btn">
-                        <a class="nav-link page-text" href="https://github.com/wspalding" target="_blank">Github</a>
+                        <a class="nav-link page-text" href="https://github.com/wspalding" target="_blank">
+                            Github
+                            <i class="fab fa-github"></i>
+                        </a>
                     </div>   
                     <div class="card nav-btn right-nav-btn">
-                        <a class="nav-link page-text" href="https://linkedin.com/in/william-spalding" target="_blank">Linkedin</a>
+                        <a class="nav-link page-text" href="https://linkedin.com/in/william-spalding" target="_blank">
+                            Linkedin
+                            <i class="fab fa-linkedin"></i>
+                        </a>
                     </div>
  
                     

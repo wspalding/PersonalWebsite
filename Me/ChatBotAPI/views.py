@@ -34,6 +34,7 @@ def index(request):
 def get_chatbot_response(request):
     data = request.GET.get('prompt')
     history = request.GET.get('history')
+    print(data, history)
     answer = cbs.get_response(data, history)
     return JsonResponse({"answer": answer})
 

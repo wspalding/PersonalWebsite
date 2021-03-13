@@ -6,8 +6,10 @@ body {
 
 .body-content {
     margin: auto;
-    background: rgb(255,255,255);
-    background: radial-gradient(circle, rgba(255,255,255,1) 43%, rgba(0,212,255,1) 100%);
+    /* background: rgb(255,255,255); */
+    /* background: radial-gradient(circle, rgba(255,255,255,1) 43%, rgba(0,212,255,1) 100%); */
+    background: rgb(0,212,255);
+    background: radial-gradient(circle, rgba(0,212,255,1) 47%, rgba(62,62,62,1) 100%);
     height: 100%;
 
 }
@@ -34,8 +36,9 @@ body {
 
 .nav-btn {
     margin-bottom: 10px;
-    border: double 4px lightgray;
+    border: solid 4px #5a5a5a;
     border-radius: 30px;
+    background: #42d4ff;
 }
 
 .left-nav-btn {
@@ -51,6 +54,7 @@ body {
 .nav-link {
     padding: 30px;
     font-size: x-large;
+    color: #5a5a5a;
 }
 
 .profile-img {
@@ -69,13 +73,45 @@ body {
     margin: auto;
     width: 100%;
     height: 20rem;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
+
+.chatbot-text::-webkit-scrollbar {
+    display: none;
+}
+
 
 .chatbot-input {
     margin: auto;
 }
 
-.input-text-box{
+.input-text-box {
     margin: auto;
     width: 100%;
+    background-color: rgba(62,62,62,1);
+    color: white;
+    outline: none;
+    border-radius: 20px;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.chat-bubble {
+    border: solid 1px black;
+    border-radius: 10px;
+    padding: 4px;
+    margin: 4px;
+}
+
+.chat-bubble.person-chat {
+    background: #3e3e3e;
+    border: none;
+    color: #42d4ff;
+}
+
+.chat-bubble.bot-chat {
+
 }

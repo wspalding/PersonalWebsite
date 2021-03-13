@@ -1,19 +1,30 @@
 var chatHistory = [];
 var currentRequest = null;
+var requestCount = 0;
 
 $( document ).ready(function() {
     initChatBot();
-    GetChatBotResponse("hello");
+    currentRequest = GetChatBotResponse("hello");
+    currentRequest.then(
+        function (result) {
+            chatHistory.push(new Message(result.answer, true))
+            renderChat()
+        },
+        function (error) {
+            chatHistory.push(new Message("an error occured", true, isError=true))
+        }
+    );
     renderChat()
 });
 
 function initChatBot() {
     $('.input-text-box').on("keyup", function(e) {
         if(e.keyCode == 13) {
-            text = $('.input-text-box').val();
+            text = $('.input-text-box').val().trim();
             newMessage = new Message(text, false);
 
-            currentRequest = GetChatBotResponse(text, gatherChatHistory())    
+            currentRequest = GetChatBotResponse(text, gatherChatHistory())   
+            requestCount++; 
             $('.input-text-box').val("")
 
             chatHistory.push(newMessage)
@@ -21,11 +32,17 @@ function initChatBot() {
 
             currentRequest.then(
                 function (result) {
-                    chatHistory.push(new Message(result.answer, true))
-                    renderChat()
+                    requestCount--;
+                    if(requestCount == 0) {
+                        chatHistory.push(new Message(result.answer, true))
+                        renderChat()
+                    }
                 },
                 function (error) {
-                    chatHistory.push(new Message("an error occured", true, isError=true))
+                    requestCount--;
+                    if(requestCount == 0) {
+                        chatHistory.push(new Message("an error occured", true, isError=true))
+                    }
                 }
             );
         }
@@ -70,6 +87,9 @@ function gatherChatHistory() {
             currSpeaker = chatHistory[i].isBot;
         }
         else {
+            if(chatHistory[i].isError) {
+                continue;
+            }
             if(currSpeaker == chatHistory[i].isBot){
                 h[h.length - 1] += " " + chatHistory[i].message
             }
@@ -102,7 +122,7 @@ class Message {
             `
         } else {
             return `
-            <div class="row chat-bubble ${userClass} error-message">
+            <div class="row chat-bubble error-message ${userClass}">
                 ${this.message}
             </div>
             `

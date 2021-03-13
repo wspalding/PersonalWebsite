@@ -115,3 +115,7 @@ body {
 .chat-bubble.bot-chat {
 
 }
+
+.chat-bubble.error-message {
+    color: red;
+}

@@ -1,7 +1,7 @@
 import json
 from django.conf import settings
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 
 from tensorflow.keras.models import load_model
 
@@ -32,18 +32,21 @@ def index(request):
 
 
 def get_chatbot_response(request):
-    data = request.GET.get('prompt')
-    history = request.GET.get('history')
-    print(data, history)
-    answer = cbs.get_response(data, history)
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    data = json.loads(request.body)
+    prompt = data.get('prompt')
+    history = data.get('history')
+    print(type(prompt), type(history))
+    answer = cbs.get_response(prompt, history)
     return JsonResponse({"answer": answer})
 
 
 def build_chatbot(request):
     # r = cbf.build_chatbot_for_persona(constants.CURRENT_PERSONA) 
     # data = cbf.load_personachat_dataset()
-    cbf.train_model_on_dataset()
-    return JsonResponse()
+    # cbf.train_model_on_dataset()
+    return JsonResponse({"not": "built"})
 
 
 def test(request):

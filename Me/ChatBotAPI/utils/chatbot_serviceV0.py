@@ -43,6 +43,7 @@ class ChatBotServiceV0():
     def get_response(self, raw_text, history):
         if not history:
             history = []
+        history = [self.tokenizer.encode(h) for h in history]
         history.append(self.tokenizer.encode(raw_text))
         with torch.no_grad():
             out_ids = self.sample_sequence(history)

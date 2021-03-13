@@ -23,7 +23,8 @@ function initChatBot() {
             text = $('.input-text-box').val().trim();
             newMessage = new Message(text, false);
 
-            currentRequest = GetChatBotResponse(text, gatherChatHistory())   
+            currentRequest = GetChatBotResponse(text, gatherChatHistory())
+
             requestCount++; 
             $('.input-text-box').val("")
 
@@ -65,13 +66,14 @@ function renderChat() {
 
 function GetChatBotResponse(promt, history) {
     return $.ajax({
-        type: 'GET',
+        type: 'POST',
         url: '/chatbot/get_response', 
         contentType: 'application/json',
-        data : {
+        headers: { "X-CSRFToken": readCookie('csrftoken') },
+        data : JSON.stringify({
             prompt: promt,
             history: history
-        }
+        })
     })
 }
 
@@ -129,4 +131,15 @@ class Message {
         }
 
     }
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if(c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
 }

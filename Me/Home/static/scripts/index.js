@@ -5,13 +5,19 @@ var requestCount = 0;
 $( document ).ready(function() {
     initChatBot();
     currentRequest = GetChatBotResponse("hello");
+    renderChat()
+    requestCount++;
     currentRequest.then(
         function (result) {
-            chatHistory.push(new Message(result.answer, true))
-            renderChat()
+            requestCount--;
+            chatHistory.push(new Message(result.answer, true));
+            renderChat();
+
         },
         function (error) {
-            chatHistory.push(new Message("an error occured", true, isError=true))
+            requestCount--;
+            chatHistory.push(new Message("an error occured", true, isError=true));
+            renderChat();
         }
     );
     renderChat()
@@ -58,6 +64,15 @@ function renderChat() {
     chatHistory.forEach(m => {
         innerHTML += m.html
     })
+    if(requestCount > 0) {
+        innerHTML += `
+        <div class="row">
+                <div class="chat-bubble bot-chat">
+                    <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                </div>
+            </div>
+        `
+    }
     textBox.html(innerHTML);
     textBox.scrollTop(textBox[0].scrollHeight)
 }
@@ -72,7 +87,8 @@ function GetChatBotResponse(promt, history) {
         headers: { "X-CSRFToken": readCookie('csrftoken') },
         data : JSON.stringify({
             prompt: promt,
-            history: history
+            history: history,
+            persona: 'Primary'
         })
     })
 }

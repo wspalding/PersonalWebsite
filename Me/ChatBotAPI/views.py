@@ -37,8 +37,8 @@ def get_chatbot_response(request):
     data = json.loads(request.body)
     prompt = data.get('prompt')
     history = data.get('history')
-    print(type(prompt), type(history))
-    answer = cbs.get_response(prompt, history)
+    persona = data.get('persona')
+    answer = cbs.get_response(persona, prompt, history)
     return JsonResponse({"answer": answer})
 
 

@@ -19,9 +19,9 @@ class ChatBotServiceV0():
         self.tokenizer = tokenizer_class.from_pretrained(self.model_checkpoint)
         self.model = model_class.from_pretrained(self.model_checkpoint)
 
-        persona, _, _ = self.get_persona(kwargs.get('persona'))
-        tokens = [self.tokenizer.tokenize(p) for p in persona]
-        self.persona = [self.tokenizer.convert_tokens_to_ids(t) for t in tokens]
+        # persona, _, _ = self.get_persona(kwargs.get('persona'))
+        # tokens = [self.tokenizer.tokenize(p) for p in persona]
+        # self.persona = [self.tokenizer.convert_tokens_to_ids(t) for t in tokens]
 
         self.bos, self.eos, self.speaker1, self.speaker2, self.pad = constants.SPECIAL_TOKENS
         self.bos_id = self.tokenizer.convert_tokens_to_ids(self.bos)
@@ -40,26 +40,29 @@ class ChatBotServiceV0():
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.no_sample = False
 
-    def get_response(self, raw_text, history):
+    def get_response(self, persona, raw_text, history):
+        persona_statements, _, _ = self.get_persona(persona)
+        tokens = [self.tokenizer.tokenize(p) for p in persona_statements]
+        persona_tokens = [self.tokenizer.convert_tokens_to_ids(t) for t in tokens]
         if not history:
             history = []
         history = [self.tokenizer.encode(h) for h in history]
         history.append(self.tokenizer.encode(raw_text))
         with torch.no_grad():
-            out_ids = self.sample_sequence(history)
+            out_ids = self.sample_sequence(persona_tokens, history)
         history.append(out_ids)
         history = history[-(2*self.max_history+1):]
         out_text = self.tokenizer.decode(out_ids, skip_special_tokens=True)
         return out_text
 
 
-    def sample_sequence(self, history, current_output=None):
+    def sample_sequence(self, persona_statements, history, current_output=None):
         special_tokens_ids = self.tokenizer.convert_tokens_to_ids(constants.SPECIAL_TOKENS)
         if current_output is None:
             current_output = []
 
         for i in range(self.max_length):
-            instance = self.build_input(self.persona, history, current_output, self.tokenizer, with_eos=False)
+            instance = self.build_input(persona_statements, history, current_output, self.tokenizer, with_eos=False)
 
             input_ids = torch.tensor(instance["input_ids"], device=self.device).unsqueeze(0)
             token_type_ids = torch.tensor(instance["token_type_ids"], device=self.device).unsqueeze(0)

@@ -1,5 +1,7 @@
 # [START django_app]
-runtime: python39
+runtime: python38
+
+entrypoint: gunicorn -b :$PORT mysite.wsgi
 
 handlers:
 # This configures Google App Engine to serve the files in the app's static

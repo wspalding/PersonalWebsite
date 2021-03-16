@@ -72,7 +72,7 @@ body {
 .chatbot-text {
     margin: auto;
     width: 100%;
-    height: 20rem;
+    height: 15rem;
     overflow-y: scroll;
     padding-top: 15px;
     -ms-overflow-style: none;

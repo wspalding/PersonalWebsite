@@ -29,7 +29,7 @@ class ChatBotServiceV0():
         self.pad_id = self.tokenizer.convert_tokens_to_ids(self.pad)
 
         # args
-        self.max_history = 2
+        self.max_history = 4
         self.min_length = 1
         self.max_length = 20
         self.temperature = 0.7

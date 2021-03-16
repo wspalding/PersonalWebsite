@@ -23,8 +23,12 @@ from .secrets import SECRET_KEY
 # SECRET_KEY = '2*%xq6fk783kd*)6w8xtbx^%si8=uaa9=!0pm+g981alx)bd!@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+if os.getenv('GAE_APPLICATION', None):
+    DEBUG = False
+else:
+    DEBUG = True
 
+    
 ALLOWED_HOSTS = ['*']
 
 

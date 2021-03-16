@@ -39,20 +39,20 @@ function initChatBot() {
 
             currentRequest.then(
                 function (result) {
+                    //console.log("success before --", requestCount)
                     requestCount--;
                     if(requestCount == 0) {
                         chatHistory.push(new Message(result.answer, true))
                         renderChat()
                     }
-                    console.log("success: ", currentRequest)
                 },
                 function (error) {
+                    //console.log("error before --", requestCount)
                     requestCount--;
                     if(requestCount == 0) {
                         chatHistory.push(new Message("an error occured", true, isError=true))
                         renderChat()
                     }
-                    console.log("error: ", currentRequest)
                 }
             );
         }

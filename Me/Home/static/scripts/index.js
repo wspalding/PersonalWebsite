@@ -44,12 +44,15 @@ function initChatBot() {
                         chatHistory.push(new Message(result.answer, true))
                         renderChat()
                     }
+                    console.log("success: ", currentRequest)
                 },
                 function (error) {
                     requestCount--;
                     if(requestCount == 0) {
                         chatHistory.push(new Message("an error occured", true, isError=true))
+                        renderChat()
                     }
+                    console.log("error: ", currentRequest)
                 }
             );
         }

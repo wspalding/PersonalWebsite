@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -24,8 +23,12 @@ from .secrets import SECRET_KEY
 # SECRET_KEY = '2*%xq6fk783kd*)6w8xtbx^%si8=uaa9=!0pm+g981alx)bd!@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if os.getenv('GAE_APPLICATION', None):
+    DEBUG = False
+else:
+    DEBUG = True
 
+    
 ALLOWED_HOSTS = ['*']
 
 
@@ -72,12 +75,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Me.wsgi.application'
 
+# PyMySQL
+import pymysql
+pymysql.version_info = (1, 4, 6, 'final', 0)  # change mysqlclient version
+pymysql.install_as_MySQLdb()
+
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-from .secrets import database_config
-DATABASES = database_config
+from .secrets import prod_database_config, local_database_config
+if os.getenv('GAE_APPLICATION', None):
+    DATABASES = prod_database_config
+else:
+    DATABASES = local_database_config
 
 
 # Password validation

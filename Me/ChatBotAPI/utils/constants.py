@@ -1,7 +1,8 @@
+from django.conf import settings
 
-PATH_TO_UTILS = 'Me/ChatBotAPI/utils/'
-PATH_TO_DATA = 'Me/ChatBotAPI/utils/data/'
-PATH_TO_MODELS = 'Me/ChatBotAPI/utils/models/'
+PATH_TO_UTILS = settings.BASE_DIR + '/ChatBotAPI/utils/'
+PATH_TO_DATA = settings.BASE_DIR + '/ChatBotAPI/utils/data/'
+PATH_TO_MODELS = settings.BASE_DIR + '/ChatBotAPI/utils/models/'
 
 
 CHATBOT_MODEL_FILE = 'chatbot_model.h5'

@@ -11,6 +11,7 @@ from transformers import OpenAIGPTLMHeadModel, OpenAIGPTTokenizer #, GPT2LMHeadM
 
 class ChatBotServiceV0():
     def __init__(self, **kwargs) -> None:
+        # print('INITIALIZING CHATBOT SERVICE')
         self.model_checkpoint = kwargs.get('model_checkpoint')
         if not self.model_checkpoint:
             self.model_checkpoint = self.download_pretrained_model()
@@ -18,10 +19,7 @@ class ChatBotServiceV0():
         model_class = OpenAIGPTLMHeadModel
         self.tokenizer = tokenizer_class.from_pretrained(self.model_checkpoint)
         self.model = model_class.from_pretrained(self.model_checkpoint)
-
-        # persona, _, _ = self.get_persona(kwargs.get('persona'))
-        # tokens = [self.tokenizer.tokenize(p) for p in persona]
-        # self.persona = [self.tokenizer.convert_tokens_to_ids(t) for t in tokens]
+        # print('MODEL AND TOKENIZER LOADED')
 
         self.bos, self.eos, self.speaker1, self.speaker2, self.pad = constants.SPECIAL_TOKENS
         self.bos_id = self.tokenizer.convert_tokens_to_ids(self.bos)
@@ -31,7 +29,7 @@ class ChatBotServiceV0():
         self.pad_id = self.tokenizer.convert_tokens_to_ids(self.pad)
 
         # args
-        self.max_history = 2
+        self.max_history = 4
         self.min_length = 1
         self.max_length = 20
         self.temperature = 0.7

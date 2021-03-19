@@ -17,3 +17,7 @@
 __pycache__/
 # Ignored by the build system
 /setup.cfg
+
+# ignore personachat dat files
+ChatBotAPI/utils/data/personachat_self_original.json
+ChatBotAPI/utils/data/personachat_formatted_ids.json

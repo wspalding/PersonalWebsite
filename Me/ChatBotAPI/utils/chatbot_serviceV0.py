@@ -18,7 +18,7 @@ class ChatBotServiceV0():
         tokenizer_class = OpenAIGPTTokenizer
         model_class = OpenAIGPTLMHeadModel
         self.tokenizer = tokenizer_class.from_pretrained(self.model_checkpoint)
-        self.model = model_class.from_pretrained(self.model_checkpoint)
+        self.model = model_class.from_pretrained(self.model_checkpoint).eval()
         # print('MODEL AND TOKENIZER LOADED')
 
         self.bos, self.eos, self.speaker1, self.speaker2, self.pad = constants.SPECIAL_TOKENS

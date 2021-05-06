@@ -50,7 +50,7 @@ function initChatBot() {
                     //console.log("error before --", requestCount)
                     requestCount--;
                     if(requestCount == 0) {
-                        chatHistory.push(new Message("an error occured", true, isError=true))
+                        chatHistory.push(new Message("an error occured, please try again", true, isError=true))
                         renderChat()
                     }
                 }

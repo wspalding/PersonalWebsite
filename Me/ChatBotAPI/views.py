@@ -21,7 +21,6 @@ from ChatBotAPI import models
 chatbot_model_checkpoint = constants.PATH_TO_MODELS + settings.CHATBOT_MODEL_CHECKPOINT
 chatbot_persona = settings.CHATBOT_PERSONA
 
-cbs = ChatBotServiceV0(model_checkpoint=chatbot_model_checkpoint)
 
 # Create your views here.
 def index(request):
@@ -34,6 +33,7 @@ def index(request):
 
 
 def get_chatbot_response(request):
+    cbs = ChatBotServiceV0(model_checkpoint=chatbot_model_checkpoint)
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     data = json.loads(request.body)

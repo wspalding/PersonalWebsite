@@ -11,38 +11,49 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from pathlib import Path
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-from .secrets import SECRET_KEY
-# SECRET_KEY = '2*%xq6fk783kd*)6w8xtbx^%si8=uaa9=!0pm+g981alx)bd!@'
+# from .secrets import SECRET_KEY
+SECRET_KEY = '2*%xq6fk783kd*)6w8xtbx^%si8=uaa9=!0pm+g981alx)bd!@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if os.getenv('GAE_APPLICATION', None):
-    DEBUG = False
-else:
-    DEBUG = True
+# if os.getenv('GAE_APPLICATION', None):
+#     DEBUG = False
+# else:
+DEBUG = True
 
     
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['192.168.1.119', '127.0.0.1']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # websockets
+    'channels',
+    'daphne',
+
+    # django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # apps
     'Home',
-    'ChatBotAPI'
+    # 'ChatBotAPI'
 ]
 
 MIDDLEWARE = [
@@ -74,21 +85,29 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Me.wsgi.application'
+ASGI_APPLICATION = "Me.asgi.application"
+
 
 # PyMySQL
-import pymysql
-pymysql.version_info = (1, 4, 6, 'final', 0)  # change mysqlclient version
-pymysql.install_as_MySQLdb()
+# import pymysql
+# pymysql.version_info = (1, 4, 6, 'final', 0)  # change mysqlclient version
+# pymysql.install_as_MySQLdb()
 
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-from .secrets import prod_database_config, local_database_config
-if os.getenv('GAE_APPLICATION', None):
-    DATABASES = prod_database_config
-else:
-    DATABASES = local_database_config
+# from .secrets import prod_database_config, local_database_config
+# if os.getenv('GAE_APPLICATION', None):
+#     DATABASES = prod_database_config
+# else:
+#     DATABASES = local_database_config
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
+}
 
 
 # Password validation
@@ -129,6 +148,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
+
+# Channels
+# Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 # ChatBot Model Checkpoint

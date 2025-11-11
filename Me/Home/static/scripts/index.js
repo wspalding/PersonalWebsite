@@ -6,6 +6,7 @@ wsScheme + '://' + window.location.host + '/ws/chat/' + roomName + '/'
 );
 var chatHistory = [];
 var requestCount = 0;
+var gpu_active = false
 
 
 $( document ).ready(function() {
@@ -52,9 +53,10 @@ function renderChat() {
         innerHTML += m.html
     })
     if(requestCount > 0) {
+        gpu_message = gpu_active ? '' : 'I promise it’s not broken, I’m just saving up for a graphics card.'
         innerHTML += `
         <div class="row">
-                <div class="chat-bubble bot-chat">
+                <div class="chat-bubble bot-chat">` + gpu_message + `
                     <i class="fa fa-spinner fa-pulse fa-fw"></i>
                 </div>
             </div>

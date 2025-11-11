@@ -4,15 +4,31 @@ const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
 const chatSocket = new WebSocket(
 wsScheme + '://' + window.location.host + '/ws/chat/' + roomName + '/'
 );
+var chatHistory = [];
+var requestCount = 0;
+
+
+$( document ).ready(function() {
+    console.log('called');
+    initChatBot();
+    renderChat();
+
+});
+
+console.log('init');
 
 chatSocket.onopen = function (e) {
 console.log("WebSocket connected");
 };
 
 chatSocket.onmessage = function (e) {
-const data = e.data;
-console.log("Message from server:", data);
-// Update the DOM with new chat text, etc.
+    const data = JSON.parse(e.data)
+    const message = data['message'];
+    console.log("Message from server:", message);
+    // Update the DOM with new chat text, etc.
+    requestCount--;
+    chatHistory.push(new Message(message, true))
+    renderChat()
 };
 
 chatSocket.onclose = function (e) {
@@ -22,6 +38,77 @@ console.log("WebSocket closed unexpectedly");
 // Example send:
 function sendMessage(msg) {
 chatSocket.send(msg);
+}
+
+
+
+
+
+
+function renderChat() {
+    textBox = $('.chatbot-text')
+    innerHTML = ""
+    chatHistory.forEach(m => {
+        innerHTML += m.html
+    })
+    if(requestCount > 0) {
+        innerHTML += `
+        <div class="row">
+                <div class="chat-bubble bot-chat">
+                    <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                </div>
+            </div>
+        `
+    }
+    textBox.html(innerHTML);
+    textBox.scrollTop(textBox[0].scrollHeight)
+}
+
+
+function initChatBot() {
+    $('#input-text-box').on("keyup", function(e) {
+        if(e.keyCode == 13) {
+            text = $('#input-text-box').val().trim();
+            newMessage = new Message(text, false);
+
+            sendMessage(text)
+            // console.log(text)
+            requestCount++; 
+            $('#input-text-box').val("")
+
+            chatHistory.push(newMessage)
+            renderChat()
+
+        }
+    });
+}
+
+class Message {
+    constructor(message, isBot, isError=false){
+        this.message = message;
+        this.isBot = isBot;
+        this.isError = isError;
+    }
+
+    get html() {
+        var userClass = ((!this.isBot) ? 'person-chat ml-auto' : 'bot-chat');
+        if(!this.isError) {
+            return `
+            <div class="row">
+                <div class="chat-bubble ${userClass}">
+                    ${this.message}
+                </div>
+            </div>
+            `
+        } else {
+            return `
+            <div class="row chat-bubble error-message ${userClass}">
+                ${this.message}
+            </div>
+            `
+        }
+
+    }
 }
 
 

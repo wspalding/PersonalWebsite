@@ -93,25 +93,63 @@ class Message {
     }
 
     get html() {
-        var userClass = ((!this.isBot) ? 'person-chat ml-auto' : 'bot-chat');
+        var userClass = ((!this.isBot) ? 'person-chat ml-auto' : 'bot-chat formatted');
         if(!this.isError) {
             return `
             <div class="row">
                 <div class="chat-bubble ${userClass}">
-                    ${this.message}
+                    ${renderMarkdown(this.message)}
                 </div>
             </div>
             `
         } else {
             return `
             <div class="row chat-bubble error-message ${userClass}">
-                ${this.message}
+                ${renderMarkdown(this.message)}
             </div>
             `
         }
 
     }
 }
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function renderMarkdown(text) {
+    if (!text) return "";
+    let html = escapeHtml(text);
+
+    // Headings (supporting up to ######)
+    html = html.replace(/^###### (.*)$/gm, "<h6>$1</h6>");
+    html = html.replace(/^##### (.*)$/gm, "<h5>$1</h5>");
+    html = html.replace(/^#### (.*)$/gm, "<h4>$1</h4>");
+    html = html.replace(/^### (.*)$/gm, "<h3>$1</h3>");
+    html = html.replace(/^## (.*)$/gm, "<h2>$1</h2>");
+    html = html.replace(/^# (.*)$/gm, "<h1>$1</h1>");
+
+    // Bold **text**
+    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+    // Italic *text* or _text_
+    html = html.replace(/(^|[^*])\*(?!\s)([^*]+?)\*(?!\*)/g, "$1<em>$2</em>");
+    html = html.replace(/(^|[^_])_(?!\s)([^_]+?)_(?!_)/g, "$1<em>$2</em>");
+
+    // Inline code `code`
+    html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    // Links [text](url)
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    return html;
+}
+
 
 
 // ------------------------------------------------------------------------------------------------------------------

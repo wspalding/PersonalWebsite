@@ -23,17 +23,29 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# from .secrets import SECRET_KEY
-SECRET_KEY = '2*%xq6fk783kd*)6w8xtbx^%si8=uaa9=!0pm+g981alx)bd!@'
+# Now loaded from the DJANGO_SECRET_KEY environment variable.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("DJANGO_SECRET_KEY environment variable is not set")
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# if os.getenv('GAE_APPLICATION', None):
-#     DEBUG = False
-# else:
-DEBUG = True
+# Controlled via DJANGO_DEBUG environment variable ("True" / "False")
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
-    
-ALLOWED_HOSTS = ['192.168.1.119', '127.0.0.1']
+
+# Comma-separated hostnames in DJANGO_ALLOWED_HOSTS, e.g.
+# "127.0.0.1,localhost,williamspalding.com,www.williamspalding.com"
+ALLOWED_HOSTS = os.environ.get(
+    'DJANGO_ALLOWED_HOSTS',
+    '127.0.0.1,localhost'
+).split(',')
+# ALLOWED_HOSTS = [
+#     '192.168.1.119', 
+#     '127.0.0.1', 
+#     'williamspalding.com', 
+#     'www.williamspalding.com'
+#     ]
 
 
 # Application definition
@@ -147,7 +159,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = 'static'
+# Where collectstatic will put all files for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = 'static'
 
 # Channels
 # Channels

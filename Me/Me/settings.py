@@ -14,6 +14,10 @@ import os
 from pathlib import Path
 
 
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).lower() in ('1', 'true', 'yes', 'on')
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,6 +80,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'Home.middleware.VisitTrackingMiddleware',
 ]
 
 ROOT_URLCONF = 'Me.urls'
@@ -178,3 +183,44 @@ CHANNEL_LAYERS = {
 # ChatBot Model Checkpoint
 CHATBOT_MODEL_CHECKPOINT = 'HFPretrained'
 CHATBOT_PERSONA = 'Primary'
+
+
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.smtp.EmailBackend'
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', True)
+EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
+DEFAULT_FROM_EMAIL = os.environ.get('REPORT_EMAIL_FROM', 'website-report@localhost')
+REPORT_EMAIL_FROM = os.environ.get('REPORT_EMAIL_FROM', DEFAULT_FROM_EMAIL)
+REPORT_EMAIL_TO = [
+    email.strip()
+    for email in os.environ.get('REPORT_EMAIL_TO', '').split(',')
+    if email.strip()
+]
+SITE_PUBLIC_URL = os.environ.get('SITE_PUBLIC_URL', 'https://williamspalding.com/')
+SITE_LOCAL_URL = os.environ.get('SITE_LOCAL_URL', 'http://127.0.0.1/')
+VISITOR_TRACKING_ENABLED = env_bool('VISITOR_TRACKING_ENABLED', True)
+VISIT_RETENTION_DAYS = int(os.environ.get('VISIT_RETENTION_DAYS', '180'))
+VISITOR_TRACKING_EXCLUDED_PATH_PREFIXES = (
+    '/admin/',
+    '/static/',
+    '/favicon.ico',
+    '/robots.txt',
+)
+VISITOR_TRACKING_BOT_SUBSTRINGS = (
+    'bot',
+    'spider',
+    'crawl',
+    'slurp',
+    'curl',
+    'wget',
+    'python-requests',
+    'monitor',
+    'uptime',
+    'healthcheck',
+)

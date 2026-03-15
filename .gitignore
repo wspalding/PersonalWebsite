@@ -117,6 +117,7 @@ config.yml
 # (Just rules to avoid accidental commit)
 etc/nginx/
 etc/systemd/
+systemd/
 
 # Project-specific ignored paths
 Me/Me/secrets.py
@@ -129,6 +130,7 @@ Me/ChatBotAPI/utils/data/personachat_formatted_ids.json
 Me/ChatBotAPI/utils/models/HFPretrained/
 wandb/
 google_cloud_sdk/
+redeploy_personal_website.sh
 
 # Removes accidental macOS junk files
 .DS_Store
